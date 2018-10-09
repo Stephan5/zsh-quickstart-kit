@@ -194,6 +194,9 @@ load-starter-plugin-list() {
   # Add Fish-like autosuggestions to your ZSH.
   zgenom load zsh-users/zsh-autosuggestions
 
+  zgenom mafredri/zsh-async
+  zgenom sindresorhus/pure
+
   # k is a zsh script / plugin to make directory listings more readable,
   # adding a bit of color and some git status information on files and
   # directories.
@@ -208,6 +211,9 @@ load-starter-plugin-list() {
     zgenom load romkatv/powerlevel10k powerlevel10k
     warn-about-prompt-change
   fi
+
+  # Load me last
+  GENCOMPL_FPATH=$HOME/.zsh/complete
 
   # Save it all to init script.
   zgenom save

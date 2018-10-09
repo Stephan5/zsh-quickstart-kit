@@ -276,7 +276,6 @@ PATH="$PATH:/sbin:/usr/sbin:/bin:/usr/bin"
 # If you need to add extra directories to $PATH that are not checked for
 # here, add a file in ~/.zshrc.d - then you won't have to maintain a
 # fork of the kit.
-
 # Conditional PATH additions
 for path_candidate in /Applications/Xcode.app/Contents/Developer/usr/bin \
   /opt/homebrew/bin \
