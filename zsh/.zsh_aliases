@@ -122,6 +122,10 @@ alias raek="rake"
 alias tartvf="tar tvf"
 alias tartvzf="tar tvzf"
 alias tarxvf="tar xvf"
+alias gbrm="grbm"
+
+# Alias rm -rf to trash for safety
+alias rm -rf="trash"
 
 # Deal with various stupidities.
 
@@ -147,6 +151,57 @@ fi
 # Help the lazy typists again.
 alias ..="cd .."
 alias ...="cd ../.."
+
+#Custom aliases
+alias dp="cd ~/Development/developer-portal"
+alias mp="cd ~/Development/management-portal"
+alias pt="cd ~/Development/platform2"
+alias sup="cd ~/Development/settle-up"
+alias envi="cd ~/Development/environments"
+alias aws-infra="cd ~/Development/aws-infrastructure"
+
+alias dev="cd ~/Development"
+alias ni="npm install"
+alias ns="npm run start"
+alias nt="npm run test"
+alias nb="npm run build"
+alias gs="gsta && gcm && gitpull && gstaa"
+alias pret="prettier --jsx-bracket-same-line=true --print-width=120 --semi=true src/**/*.js --write"
+alias ntw="nt -- --watch"
+alias nci="npm run clean && trash node_modules/ && ni"
+alias ncis="nci && ns"
+
+alias demo-cert="sh ~/Development/scripts/Bastions.sh demo db-access"
+alias dca="demo-cert"
+alias test-cert="sh ~/Development/scripts/Bastions.sh test db-access"
+alias tca="test-cert"
+alias bastion="sh ~/Development/scripts/Bastions.sh"
+# Things
+alias task="sh ~/Development/scripts/Task.sh add branch"
+alias project="sh ~/Development/scripts/Task.sh add-project branch"
+alias task-nb="sh ~/Development/scripts/Task.sh add no-branch"
+alias project-nb="sh ~/Development/scripts/Task.sh add-project no-branch"
+
+# Custom Git
+alias st="gsta"
+alias sta="gstaa"
+alias rb="gcm && gitpull && gco - && grbm"
+alias strb="st && gcm && gitpull && gco - && grbm && sta"
+alias sw="gcm && gitpull"
+alias stsw="st && gcm && gitpull && sta"
+
+alias trash-stash="git stash clear"
+
+alias babel-beta="ni @babel/cli@latest @babel/core@latest @babel/plugin-proposal-class-properties@latest @babel/plugin-proposal-object-rest-spread@latest @babel/plugin-syntax-dynamic-import@latest @babel/preset-env@latest @babel/preset-flow@latest @babel/preset-react@latest @babel/preset-stage-3@latest @babel/register@latest @babel/runtime@latest @babel/plugin-syntax-optional-chaining@latest babel-loader@next"
+
+# Ngrok
+alias ng="/Applications/ngrok http"
+
+# Meta
+alias aliases="atom ~/zsh-quickstart-kit/zsh/.zsh_aliases"
+
+
+alias uuid="uuidgen | tr '[:upper:]' '[:lower:]' | pbcopy && pbpaste && echo"
 
 # Honor old .zsh_aliases.local customizations, but print depecation warning.
 if [ -f ~/.zsh_aliases.local ]; then
