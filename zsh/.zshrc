@@ -288,7 +288,7 @@ setopt correct
 unsetopt correctall
 
 # Base PATH
-PATH="/opt/homebrew/bin:$PATH:/sbin:/usr/sbin:/bin:/usr/bin"
+PATH="/opt/homebrew/bin:$PATH:/usr/local/bin:/sbin:/usr/sbin:/bin:/usr/bin"
 
 # If you need to add extra directories to $PATH that are not checked for
 # here, add a file in ~/.zshrc.d - then you won't have to maintain a
@@ -315,7 +315,9 @@ for path_candidate in \
   $HOME/.linuxbrew/sbin \
   $HOME/.local/bin \
   $HOME/.rbenv/bin \
-  $HOME/bin
+  $HOME/bin \
+  $HOME/src/gocode/bin \
+  $HOME/gocode
 do
   if [[ -d "${path_candidate}" ]]; then
     path+=("${path_candidate}")
@@ -354,6 +356,23 @@ fi
 if [[ -z ${LS_COLORS-} ]]; then
   export LS_COLORS='di=1;34;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=0;41:sg=0;46:tw=0;42:ow=0;43:'
 fi
+
+export COLOR_WHITE='\e[1;37m'
+export COLOR_BLACK='\e[0;30m'
+export COLOR_BLUE='\e[0;34m'
+export COLOR_LIGHT_BLUE='\e[1;34m'
+export COLOR_GREEN='\e[0;32m'
+export COLOR_LIGHT_GREEN='\e[1;32m'
+export COLOR_CYAN='\e[0;36m'
+export COLOR_LIGHT_CYAN='\e[1;36m'
+export COLOR_RED='\e[0;31m'
+export COLOR_LIGHT_RED='\e[1;31m'
+export COLOR_PURPLE='\e[0;35m'
+export COLOR_LIGHT_PURPLE='\e[1;35m'
+export COLOR_BROWN='\e[0;33m'
+export COLOR_YELLOW='\e[1;33m'
+export COLOR_GRAY='\e[0;30m'
+export COLOR_LIGHT_GRAY='\e[0;37m'
 
 onepassword-agent-check() {
   # 1password ssh agent support
@@ -596,13 +615,9 @@ if [ -f ~/.aws/aws_variables ]; then
 fi
 
 # JAVA setup - needed for iam-* tools
-#if [ -d /Library/Java/Home ];then
-# export JAVA_HOME=/Library/Java/Home
-#fi
-
-# Set java version for general use
-# export JAVA_HOME=$(/usr/libexec/java_home)
-export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+if [ -d /Library/Java/Home ];then
+ export JAVA_HOME=/Library/Java/Home
+fi
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
   # Load macOS-specific aliases
@@ -716,7 +731,7 @@ fi
 typeset -aU path;
 
 # If desk is installed, load the Hook for desk activation
-[[ -n ${DESK_ENV-} ]] && source "$DESK_ENV"
+[[ -n "$DESK_ENV" ]] && source "$DESK_ENV"
 
 # Do selfupdate checking. We do this after processing ~/.zshrc.d to make the
 # refresh check interval easier to customize.
@@ -1031,9 +1046,26 @@ fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# CUSTOM
+#########################
+#  MY CUSTOM OVERRIDES  #
+#########################
 
-cd ~/Development
+echo
+echo "Current SSH Keys:"
+ssh-add -l
+echo
+
+if [[ $PWD = /Users/stephan ]]; then
+  cd Development
+fi
+
+# Misc. Env Vars
+export KUBECONFIG=~/.kube/config
+export GPG_TTY=$TTY
+export PGPORT=5432;
+
+# Java
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 
 # Perl
 PATH="~/perl5/bin${PATH:+:${PATH}}"; export PATH;
@@ -1042,11 +1074,7 @@ PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; ex
 PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
 
-export KUBECONFIG=~/.kube/config
-export GPG_TTY=$TTY
-export PGPORT=5432;
-
-# Starling config
+# Toolbox
 if [ -e /Users/stephan.blakeslee/.starling/etc/profile ]; then
   . /Users/stephan.blakeslee/.starling/etc/profile
 else
@@ -1058,15 +1086,14 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export MAVEN_OPTS="-Xmx5000m"
-
-# GCP credentials
-export GOOGLE_CREDENTIALS=$(cat $HOME/.config/gcloud/application_default_credentials.json)
-
+# AWS
 export AWS_IAM_USERNAME=StephanBlakeslee
 
-# The next line updates PATH for the Google Cloud SDK.
+# GCP
+export GOOGLE_CREDENTIALS=$(cat $HOME/.config/gcloud/application_default_credentials.json)
 if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
 if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/stephan.blakeslee/google-cloud-sdk/completion.zsh.inc'; fi
+
+# Pure prompt
+autoload -U promptinit; promptinit
+prompt pure

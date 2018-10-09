@@ -209,6 +209,10 @@ load-starter-plugin-list() {
     warn-about-prompt-change
   fi
 
+  # Add pure theme
+  zgenom mafredri/zsh-async
+  zgenom sindresorhus/pure
+
   # Save it all to init script.
   zgenom save
 }

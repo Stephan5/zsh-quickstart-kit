@@ -136,6 +136,10 @@ alias tartvf='tar tvf'
 alias tartvzf='tar tvzf'
 alias tarxvf='tar xvf'
 alias tarxvjf='tar xvjf'
+alias gbrm='grbm'
+
+# Alias rm -rf to trash for safety
+alias rm -rf='trash'
 
 # Deal with various stupidities.
 
