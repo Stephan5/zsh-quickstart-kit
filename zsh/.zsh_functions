@@ -163,3 +163,99 @@ if [ -f ~/.zsh_functions.local ]; then
   echo ".zsh_functions.local is deprecated and will stop working after June 1st, 2022."
   echo "Make entries in ~/.zshrc.d instead. See https://github.com/unixorn/zsh-quickstart-kit#zshrcd for more details."
 fi
+
+# Add aliases
+function makeAlias() {
+  echo "alias $@" >> ~/zsh-quickstart-kit/zsh/.zsh_aliases
+}
+
+#  Trash all branches that no longer track a remote branch
+function pruneBranches_old() {
+  git fetch -p;
+    for branch in `git branch -vv | grep ': gone]' | awk '{print $1}'`;
+   do git branch -D $branch;
+ done
+}
+
+function pruneBranches() {
+
+  if [[ ! -d ".git" ]]
+    then
+      echo Not a git repo you $fg_bold[red]twat$fg_bold[white]. && return;
+  fi
+  
+  git fetch -p;
+
+  MAIN=${1:-master}
+  BRANCHES=$(git branch -vv | grep ': gone]' | awk '{print $1}')
+
+  if [[ -z "$BRANCHES" ]]
+  then
+    echo $fg_bold[magenta]No merged branches to be deleted && echo $fg_bold[white]Exiting... && return;
+  fi
+
+  echo
+  echo Branches merged into $fg_bold[cyan]$MAIN:
+  echo $fg_bold[magenta]$BRANCHES
+  echo
+  read -q "ANSWER?$fg_bold[yellow]Delete these branches? "
+  echo
+
+  if [[ $ANSWER =~ ^[Yy]$ ]]
+    then
+      echo && echo $BRANCHES | xargs -n 1 git branch -D;
+    else
+      echo && echo $fg_bold[white]Operation cancelled. && echo $fg_bold[red]Aborting... && return;
+  fi
+}
+
+#  Trash all branches that no longer track a remote branch
+function slackCommits() {
+  project=`pwd | xargs basename`
+
+echo "Searching for commit hashes in " $project;
+echo
+echo
+echo
+  git --no-pager log --boundary $1...$2 --format="%aN %s https://github.com/starlingbank/$project/commit/%h %n"
+}
+
+# pgBadger
+function badger () {
+    if [ -z "$1" ]; then
+        echo "DB identifier required";
+        return 1;
+    fi;
+    if [ -z "$2" ]; then
+        echo "mfa required";
+        return 1;
+    fi;
+    if [ -d out ]; then
+        mv -iv out "out.`date '+%y%m%d%H%M'`";
+    fi;
+    cd ~/Development/pgbadger;
+    rm -rf ~/Development/pgbadger/out;
+    mkdir out;
+    echo $2
+    assumerole StaffInProd $2;
+    rds-pgbadger -d "`date +%Y-%m-%d`" -X"-f stderr" $1;
+    open out/report.html
+}
+
+function cleanAndInstall() {
+  mvn --update-snapshots -DskipTests=true clean;
+  mvn --update-snapshots -DskipTests=true -DskipITs=true install;
+}
+
+function fixSources () {
+  originalDirectory=$PWD
+
+  cd ~/Development/platform2/connectors/regulator;
+  cleanAndInstall
+
+
+  cd ~/Development/platform2/connectors/au10tix;
+  cleanAndInstall
+
+  cd originalDirectory
+}
