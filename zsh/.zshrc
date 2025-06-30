@@ -2,6 +2,15 @@
 #
 # BSD licensed, see LICENSE.txt
 
+# Set this to use case-sensitive completion
+# CASE_SENSITIVE="true"
+
+# Uncomment following line if you want to disable colors in ls
+# DISABLE_LS_COLORS="true"
+
+# Uncomment following line if you want to disable autosetting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
 # Valid font modes:
 # flat, awesome-patched, awesome-fontconfig, nerdfont-complete, nerdfont-fontconfig
 if [[ -r ~/.powerlevel9k_font_mode ]]; then
@@ -10,12 +19,16 @@ fi
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 export COMPLETION_WAITING_DOTS="true"
+
 # Correct spelling for commands
 setopt correct
+
 # turn off the infernal correctall for filenames
 unsetopt correctall
+
 # Base PATH
 PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin
+
 # Conditional PATH additions
 for path_candidate in /opt/local/sbin \
   /Applications/Xcode.app/Contents/Developer/usr/bin \
@@ -31,31 +44,22 @@ do
     export PATH=${PATH}:${path_candidate}
   fi
 done
+
 # Yes, these are a pain to customize. Fortunately, Geoff Greer made an online
 # tool that makes it easy to customize your color scheme and keep them in sync
 # across Linux and OS X/*BSD at http://geoff.greer.fm/lscolors/
 
 export LSCOLORS='Exfxcxdxbxegedabagacad'
 export LS_COLORS='di=1;34;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=0;41:sg=0;46:tw=0;42:ow=0;43:'
-export COLOR_WHITE='\e[1;37m'
-export COLOR_BLACK='\e[0;30m'
-export COLOR_BLUE='\e[0;34m'
-export COLOR_LIGHT_BLUE='\e[1;34m'
-export COLOR_GREEN='\e[0;32m'
-export COLOR_LIGHT_GREEN='\e[1;32m'
-export COLOR_CYAN='\e[0;36m'
-export COLOR_LIGHT_CYAN='\e[1;36m'
-export COLOR_RED='\e[0;31m'
-export COLOR_LIGHT_RED='\e[1;31m'
-export COLOR_PURPLE='\e[0;35m'
-export COLOR_LIGHT_PURPLE='\e[1;35m'
-export COLOR_BROWN='\e[0;33m'
-export COLOR_YELLOW='\e[1;33m'
-export COLOR_GRAY='\e[0;30m'
-export COLOR_LIGHT_GRAY='\e[0;37m'
+
 # Fun with SSH
 if [ $(ssh-add -l | grep -c "The agent has no identities." ) -eq 1 ]; then
   if [[ "$(uname -s)" == "Darwin" ]]; then
+    # We're on OS X. Try to load ssh keys using pass phrases stored in
+    # the OSX keychain.
+    #
+    # You can use ssh-add -K /path/to/key to store pass phrases into
+    # the OSX keychain
     ssh-add -k
   fi
 fi
@@ -68,6 +72,7 @@ do
 done
 
 # Now that we have $PATH set up and ssh keys loaded, configure zgen.
+
 # start zgen
 if [ -f ~/.zgen-setup ]; then
   source ~/.zgen-setup
@@ -87,9 +92,11 @@ setopt hist_verify
 
 # Share your history across all your terminal windows
 setopt share_history
+#setopt noclobber
 
 # set some more options
 setopt pushd_ignore_dups
+#setopt pushd_silent
 
 # Keep a ton of history.
 HISTSIZE=100000
@@ -160,6 +167,18 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   fi
 fi
 
+# deal with screen, if we're using it - courtesy MacOSXHints.com
+# Login greeting ------------------
+if [ "$TERM" = "screen" -a ! "$SHOWED_SCREEN_MESSAGE" = "true" ]; then
+  detached_screens=$(screen -list | grep Detached)
+  if [ ! -z "$detached_screens" ]; then
+    echo "+---------------------------------------+"
+    echo "| Detached screens are available:       |"
+    echo "$detached_screens"
+    echo "+---------------------------------------+"
+  fi
+fi
+
 if [ -f /usr/local/etc/grc.bashrc ]; then
   source "$(brew --prefix)/etc/grc.bashrc"
 
@@ -184,6 +203,11 @@ if [ -d ~/.zsh-completions ]; then
   done
 fi
 
+echo
+echo "Current SSH Keys:"
+ssh-add -l
+echo
+
 # Honor old .zshrc.local customizations, but print deprecation warning.
 if [ -f ~/.zshrc.local ]; then
   source ~/.zshrc.local
@@ -191,7 +215,6 @@ if [ -f ~/.zshrc.local ]; then
 fi
 
 # Make it easy to append your own customizations that override the above by
-
 # loading all files from the ~/.zshrc.d directory
 mkdir -p ~/.zshrc.d
 if [ -n "$(/bin/ls ~/.zshrc.d)" ]; then
@@ -222,6 +245,9 @@ dedupe_path() {
 }
 
 dedupe_path
+
+# If desk is installed, load the Hook for desk activation
+[[ -n "$DESK_ENV" ]] && source "$DESK_ENV"
 
 # Do selfupdate checking. We do this after processing ~/.zshrc.d to make the
 # refresh check interval easier to customize.
@@ -281,30 +307,4 @@ if [[ ! -z "$QUICKSTART_KIT_REFRESH_IN_DAYS" ]]; then
   unset QUICKSTART_KIT_REFRESH_IN_DAYS
 fi
 
-source ~/zsh-quickstart-kit/zsh/sandboxd
-
-
-if [[ $PWD = /Users/stephan ]]; then
-  cd Development
-fi
-
-# Starling config
-if [ -e /Users/stephan/.starling/etc/profile ]; then
-  . /Users/stephan/.starling/etc/profile
-else
-  echo "Could not find '/Users/stephan/.starling/etc/profile'"
-fi
-
-export AWS_IAM_USERNAME=StephanBlakeslee
-export VAULT_ADDR=https://localhost:8200
-export VAULT_SKIP_VERIFY=true
-export PATH="/usr/local/opt/python@2/bin:$PATH"
-export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
-export STARLING_ACCESS_TOKEN=mFwE2Bdw87YP120iW0gACEf9WRqiVLLMm2kDdKebZqNvGl8WLb3z0MLjshSuzX77
-
-# Set Spaceship ZSH as a prompt
-# autoload -U promptinit; promptinit
-# prompt spaceship
-
-autoload -U promptinit; promptinit
-prompt pure
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
