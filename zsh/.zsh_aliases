@@ -166,3 +166,23 @@ if [ -f ~/.zsh_aliases.local ]; then
   echo ".zsh_aliases.local is deprecated and will stop working after June 1st, 2022."
   echo "Make entries in ~/.zshrc.d instead. See https://github.com/unixorn/zsh-quickstart-kit#zshrcd for more details."
 fi
+
+
+# Custom
+alias uuid="uuidgen | tr -d '\n' | tr '[:upper:]' '[:lower:]' | pbcopy && pbpaste && echo"
+alias python='python3'
+
+alias dp="cd ~/Development/developer-portal"
+alias mp="cd ~/Development/management-portal"
+alias pt="cd ~/Development/platform"
+alias envi="cd ~/Development/environments"
+alias dev="cd ~/Development"
+
+# Custom Git
+alias gbrm="grbm"
+alias st="gsta"
+alias sta="gstaa"
+alias rb="gcm && gitpull && gco - && grbm"
+alias strb="st && gcm && gitpull && gco - && grbm && sta"
+alias sw="gcm && gitpull"
+alias stsw="st && gcm && gitpull && sta"

@@ -50,22 +50,6 @@ function man() {
       man "$@"
 }
 
-if ! can_haz watch; then
-  # From commandlinefu.com
-  function watch () {
-    t="$1"
-    shift
-    while test :
-    do
-      clear
-      date=$(date)
-      echo -e "Every $ts: $@ \t\t\t\t $date"
-      $@
-      sleep "$t"
-    done
-  }
-fi
-
 # scp file to machine you're sshing into this machine from
 function mecp() {
   scp "$@" ${SSH_CLIENT%% *}:~/Downloads/;
@@ -155,6 +139,497 @@ function httpserver() {
   # Set the default Content-Type to `text/plain` instead of `application/octet-stream`
   # And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
   python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port";
+}
+
+function pruneBranches() {
+  if [[ ! -d ".git" && ! -d "../.git" ]]
+    then
+      echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
+      return;
+  fi
+
+  git fetch -p;
+
+  MAIN=${1:-master}
+  BRANCHES=$(git branch -vv | grep ': gone]' | awk '{print $1}')
+
+  if [[ -z "$BRANCHES" ]]
+  then
+    echo $fg_bold[magenta]No merged branches to be deleted && echo $fg_bold[white]Exiting... && return;
+  fi
+
+  echo
+  echo Branches merged into $fg_bold[cyan]$MAIN:
+  echo $fg_bold[magenta]$BRANCHES
+  echo
+  read -q "ANSWER?$fg_bold[yellow]Delete these branches? "
+  echo
+
+  if [[ $ANSWER =~ ^[Yy]$ ]]
+    then
+      echo && echo $BRANCHES | xargs -n 1 git branch -D;
+    else
+      echo && echo $fg_bold[white]Operation cancelled. && echo $fg_bold[red]Aborting... && return;
+  fi
+}
+
+
+# Local Postgres cluster functions
+function commandCheck() {
+  if ! hash pg_ctlcluster 2>/dev/null; then
+    echo "❌  Maybe you should try 'install' first..."
+    exit 1
+  fi
+}
+
+function startCluster() {
+  if [ -z "$1" ]
+    then
+      VERSION=13
+    else
+      VERSION=$1
+  fi
+
+  echo "➡️  Starting Postgres cluster version ${VERSION}..."
+
+  commandCheck
+  pg_ctlcluster $VERSION platform start
+}
+
+function stopCluster() {
+  if [ -z "$1" ]
+    then
+      VERSION=13
+    else
+      VERSION=$1
+  fi
+  echo "➡️  Stopping Postgres cluster version ${VERSION} (smart)..."
+
+  commandCheck
+  pg_ctlcluster $VERSION platform stop
+}
+
+function forceStopCluster() {
+  echo "➡️  Stopping Postgres cluster version ${VERSION} (fast)..."
+
+  commandCheck
+  pg_ctlcluster $VERSION platform stop -m fast
+}
+
+function restartCluster() {
+  stopCluster
+  startCluster
+}
+
+# SSH / Bastions
+# See https://possiblefs.atlassian.net/wiki/spaces/ENG/pages/195100679/SSH+Access+to+Environments
+# function demoShell() {
+#
+#   sshca request --environment 'demo' --reason 'demo database access' --valid-before '167h'
+#
+#   ssh demo-banking
+# }
+
+function closeTunnel() {
+
+  echo "Closing tunnel..."
+
+  pkill -f 'ssh.*-f'
+
+  echo "Tunnel closed!"
+}
+
+function sshDemo() {
+
+  echo "Now opening tunnel..."
+
+  ssh -f -N demo-banking
+
+  echo "Tunnel open!"
+}
+
+function demoDb() {
+
+  echo "Requesting cert for demo access..."
+
+  sshca request --environment 'demo' --reason 'demo database access' --valid-before '167h'
+
+  echo " "
+
+  sshDemo
+}
+
+
+function jdk() {
+  version=$1
+  export JAVA_HOME=$(/usr/libexec/java_home -v"$version");
+  java -version
+}
+
+function generateAvroRecords() {
+
+  PREVIOUS_DIRECTORY=$PWD
+
+  cd ~/Development/platform/platform/services/data/services/datagateway/connector
+
+  mvn -P generate-schemas
+
+  cd $PREVIOUS_DIRECTORY
+
+ }
+
+function clearTargetFolders() {
+
+  PREVIOUS_DIRECTORY=$PWD
+
+  cd ~/Development/platform
+
+  find . -name target | echo | xargs rm -r
+
+  cd $PREVIOUS_DIRECTORY
+ }
+
+ function nukeM2Repo() {
+
+   echo "Nuking m2 repository..."
+
+   rm -rf /Users/stephan.blakeslee/.m2/repository
+
+   echo " "
+
+   if [[ ! -d "/Users/stephan.blakeslee/.m2/repository" ]]
+     then
+
+       echo "Success! The m2 repo has gone bye bye"
+     else
+       echo ".m2/repository directory still exists..."
+   fi
+  }
+
+  function installPlatform() {
+
+    PREVIOUS_DIRECTORY=$PWD
+
+    cd ~/Development/platform/platform
+
+    mvn install -DskipTests -DskipITs -T1C
+
+    cd $PREVIOUS_DIRECTORY
+   }
+
+   function cleanPlatform() {
+
+     PREVIOUS_DIRECTORY=$PWD
+
+     cd ~/Development/platform/platform
+
+     mvn clean
+
+     cd $PREVIOUS_DIRECTORY
+    }
+
+
+function resolvePlatformDeps() {
+
+  PREVIOUS_DIRECTORY=$PWD
+
+  cd ~/Development/platform/platform
+
+  mvn -U dependency:resolve
+
+  cd $PREVIOUS_DIRECTORY
+ }
+
+ function createSubscriber() {
+   # set -e
+
+   PREVIOUS_DIRECTORY=$PWD
+
+   cd ~/Development/subscriber-db-logs
+
+    /opt/homebrew/Cellar/postgresql@13/13.9/bin/initdb -D /tmp/subscriber -U backup
+
+    /opt/homebrew/Cellar/postgresql@13/13.9/bin/pg_ctl -D /tmp/subscriber -l logfile start
+
+   psql -d postgres -U backup << EOF
+    ALTER USER backup WITH PASSWORD 'backup-password';
+    ALTER SYSTEM SET PORT TO 47362;
+    ALTER SYSTEM SET wal_level = replica;
+    ALTER SYSTEM SET listen_addresses = '*';
+EOF
+
+   /opt/homebrew/Cellar/postgresql@13/13.9/bin/pg_ctl -D /tmp/subscriber -l logfile stop
+   /opt/homebrew/Cellar/postgresql@13/13.9/bin/pg_ctl -D /tmp/subscriber -l logfile start
+
+  cd $PREVIOUS_DIRECTORY
+
+  echo "Subscriber v13 running on port 47362"
+ }
+
+ function createSubscriber14() {
+  set -e
+
+   if [ -z "$1" ]
+    then
+     echo "Please provide the user"
+     exit 1;
+    fi
+
+  SUBSCRIBER_USER=$1
+
+  echo $SUBSCRIBER_USER
+
+  PREVIOUS_DIRECTORY=$PWD
+
+  cd ~/Development/subscriber-db-logs
+
+  /opt/homebrew/Cellar/postgresql@14/14.7/bin/initdb -D /tmp/subscriber -U $SUBSCRIBER_USER
+
+  /opt/homebrew/Cellar/postgresql@14/14.7/bin/pg_ctl -D /tmp/subscriber -l logfile start
+
+   psql -d postgres -U $SUBSCRIBER_USER << EOF
+    ALTER USER $SUBSCRIBER_USER WITH PASSWORD '$SUBSCRIBER_USER-password';
+    ALTER SYSTEM SET PORT TO 47362;
+    ALTER SYSTEM SET wal_level = replica;
+    ALTER SYSTEM SET listen_addresses = '*';
+EOF
+
+  /opt/homebrew/Cellar/postgresql@14/14.7/bin/pg_ctl -D /tmp/subscriber -l logfile stop
+  /opt/homebrew/Cellar/postgresql@14/14.7/bin/pg_ctl -D /tmp/subscriber -l logfile start
+
+  cd $PREVIOUS_DIRECTORY
+
+  echo "Subscriber v14 running on port 47362"
+ }
+
+ function dropSubscriber() {
+  /opt/homebrew/Cellar/postgresql@13/13.9/bin/pg_ctl -D /tmp/subscriber -l logfile stop
+
+  rm -rf /tmp/subscriber
+
+   echo "✅ Subscriber dropped"
+ }
+
+ function dropSubscriber14() {
+  set -e
+  /opt/homebrew/Cellar/postgresql@14/14.7/bin/pg_ctl -D /tmp/subscriber -l logfile stop
+
+  rm -rf /tmp/subscriber
+
+   echo "✅ Subscriber dropped"
+ }
+
+ function setupPlatformDatabase() {
+  set -e
+
+#  echo "➡️  Installing extensions..."
+#CELLAR_LOCATION=$(find $(brew --cellar)/postgresql@${MAJOR_VERSION} -type d -regex ".*/[0-9]\{2\}\.[0-9]\{1,2\}") # Need to handle differing minor versions
+#pex -g "${CELLAR_LOCATION}" install pgaudit@${MAJOR_VERSION} || :
+
+  psql -p 15432 -d postgres -U postgres << EOF
+   CREATE USER test WITH SUPERUSER PASSWORD 'test' VALID UNTIL 'infinity';
+   ALTER SYSTEM SET MAX_CONNECTIONS TO 400;
+   ALTER SYSTEM SET SHARED_BUFFERS TO '512MB';
+   ALTER SYSTEM SET FSYNC TO OFF;
+   ALTER SYSTEM SET AUTOVACUUM TO ON;
+   ALTER SYSTEM SET SYNCHRONOUS_COMMIT TO OFF;
+   ALTER SYSTEM SET FULL_PAGE_WRITES TO OFF;
+   ALTER SYSTEM SET wal_level TO 'logical'
+EOF
+
+   echo "✅ Platform Database setup"
+ }
+
+ function setupSubscriber2024() {
+  set -e
+
+  readonly VERSION=16
+  readonly PORT=25434
+  readonly DATA_DIR=$HOME/Library/Application\ Support/Postgres/replication-subscriber-16
+
+  psql -d postgres -U postgres -p $PORT << EOF
+    DROP ROLE IF EXISTS backup;
+    DROP ROLE IF EXISTS temp;
+    CREATE USER temp SUPERUSER;
+EOF
+
+  psql -d postgres -U temp -p $PORT << EOF
+    ALTER ROLE postgres RENAME TO backup;
+    ALTER ROLE backup WITH PASSWORD 'backup-password';
+EOF
+
+  psql -d postgres -U backup -p $PORT << EOF
+    DROP ROLE temp;
+    ALTER SYSTEM SET wal_level                         = replica;
+    ALTER SYSTEM SET listen_addresses                  = '*';
+    ALTER SYSTEM SET shared_preload_libraries          = 'pg_cron';
+EOF
+
+  # restart
+  /Applications/Postgres.app/Contents/Versions/$VERSION/bin/pg_ctl -D $DATA_DIR stop
+  /Applications/Postgres.app/Contents/Versions/$VERSION/bin/pg_ctl -D $DATA_DIR start -o "-p $PORT"
+
+  psql -d postgres -U backup -p $PORT << EOF
+    ALTER SYSTEM SET cron.database_name                = 'postgres';
+    ALTER SYSTEM SET cron.host                         = 'localhost';
+    ALTER SYSTEM SET cron.max_running_jobs             = 5;
+    ALTER SYSTEM SET cron.enable_superuser_jobs        = on;
+    ALTER SYSTEM SET cron.use_background_workers       = on;
+    ALTER SYSTEM SET cron.log_min_messages             = warning;
+    ALTER SYSTEM SET cron.log_run                      = off;
+    ALTER SYSTEM SET cron.log_statement                = off;
+EOF
+
+   echo "Subscriber backup user and necessary config set up."
+   echo "Next you must install the pg_cron and system_stats extensions."
+ }
+
+ function switchAndRebase() {
+   if [[ ! -d ".git" && ! -d "../.git" ]]
+     then
+       echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
+       return;
+   fi
+
+   if [ -z "$1" ]
+     then
+    echo Please supply a branch to switch to you $fg_bold[red]twat$fg_bold[white]. && return;
+   fi
+
+   set -e
+
+   BRANCH=$1
+
+   echo "Switching to branch ${BRANCH} and rebasing origin/master"
+
+   git fetch
+
+   git checkout ${BRANCH}
+
+   git rebase origin/master
+
+   git status
+
+   echo "✅ Successfully rebased branch ${BRANCH} onto master!"
+ }
+
+ function switchAndPullMaster() {
+   if [[ ! -d ".git" && ! -d "../.git" ]]
+     then
+       echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
+       return;
+   fi
+
+   set -e
+
+   git checkout master
+
+   git pull
+
+   git status
+
+   echo "✅ Master up-to-date!"
+ }
+
+ function stablePull() {
+   if [[ ! -d ".git" && ! -d "../.git" ]]
+     then
+       echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
+       return;
+   fi
+
+   # set -e
+
+   git fetch --tags --force
+
+   git checkout master
+
+   git merge --ff-only stable
+
+   echo "\nMaster up-to-date with Stable tag!\n"
+ }
+
+ function stableRebase() {
+   if [[ ! -d ".git" && ! -d "../.git" ]]
+     then
+       echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
+       return;
+   fi
+
+   set -e
+
+   git fetch --tags --force
+
+   git rebase stable
+ }
+
+ function updateTags() {
+   if [[ ! -d ".git" && ! -d "../.git" ]]
+     then
+       echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
+       return;
+   fi
+
+   echo "Force fetching and updating tags for repo."
+   git fetch --tags --force
+ }
+
+
+ function removeKnownHost() {
+  ssh-keygen -R $1
+ }
+
+function platformBuild() {
+
+  if [ -z "$1" ]
+  then
+    COMMAND_PATH=""
+  else
+    COMMAND_PATH=$1
+  fi
+
+  if [ "$2" = "test" ]
+   then
+    BUILD_TYPE="test"
+  else
+    BUILD_TYPE="compileTestJava"
+  fi
+
+  if [ -z "$3" ]
+   then
+    CLEAN=""
+  elif [ "$3" = "clean" ]
+   then
+    CLEAN="clean --no-build-cache"
+  else
+    echo Unknown command: $2
+    return;
+  fi
+
+  PREVIOUS_DIRECTORY=$PWD
+  cd ~/Development/platform/platform
+
+  runGradleBuild $COMMAND_PATH $BUILD_TYPE $CLEAN
+
+  cd $PREVIOUS_DIRECTORY
+}
+
+function runGradleBuild() {
+  echo "Running Gradle platform build using the following incantation -  gradle -p $1 $2 $3"
+  echo
+  gradle -p $1 $2 $3
+}
+
+function rcommon() {
+  platformBuild common/core/replication test $1
+}
+
+function rmserver() {
+  platformBuild services/data/services/replicationmanager/server test $1
+}
+
+function rmslt() {
+  platformBuild services/data/services/replicationmanager/service-tests test $1
 }
 
 # Honor old .zsh_functions.local customizations, but print depecation warning.

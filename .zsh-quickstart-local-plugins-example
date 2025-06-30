@@ -64,7 +64,7 @@ zgenom load unixorn/rake-completion.zshplugin
 zgenom load unixorn/autoupdate-zgenom
 
 # Add my collection of miscellaneous utility functions.
-zgenom load unixorn/jpb.zshplugin
+#zgenom load unixorn/jpb.zshplugin
 
 # Colorize the things if you have grc installed. Well, some of the
 # things, anyway.

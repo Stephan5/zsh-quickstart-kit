@@ -271,7 +271,7 @@ setopt correct
 unsetopt correctall
 
 # Base PATH
-PATH="$PATH:/sbin:/usr/sbin:/bin:/usr/bin"
+PATH="$PATH:/sbin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
 
 # If you need to add extra directories to $PATH that are not checked for
 # here, add a file in ~/.zshrc.d - then you won't have to maintain a
@@ -279,7 +279,6 @@ PATH="$PATH:/sbin:/usr/sbin:/bin:/usr/bin"
 
 # Conditional PATH additions
 for path_candidate in /Applications/Xcode.app/Contents/Developer/usr/bin \
-  /opt/homebrew/bin \
   /opt/homebrew/sbin \
   /home/linuxbrew/.linuxbrew/bin \
   /home/linuxbrew/.linuxbrew/sbin \
@@ -287,6 +286,8 @@ for path_candidate in /Applications/Xcode.app/Contents/Developer/usr/bin \
   /opt/local/sbin \
   /usr/local/bin \
   /usr/local/sbin \
+  /usr/local/go/bin \
+  ~/Documents/bin \
   ~/.cabal/bin \
   ~/.cargo/bin \
   ~/.linuxbrew/bin \
@@ -562,15 +563,25 @@ fi
 
 export LOCATE_PATH=/var/db/locate.database
 
+# GCP credentials
+export GOOGLE_CREDENTIALS=$(cat $HOME/.config/gcloud/application_default_credentials.json)
+export TF_VAR_gcr_docker_registry_key="$(cat $HOME/.ssh/gcr_cred1)"
+
 # Load AWS credentials when present
 if [ -f ~/.aws/aws_variables ]; then
   source ~/.aws/aws_variables
 fi
 
+export AWS_IAM_USERNAME=StephanBlakeslee
+
 # JAVA setup - needed for iam-* tools
-if [ -d /Library/Java/Home ];then
-  export JAVA_HOME=/Library/Java/Home
-fi
+#if [ -d /Library/Java/Home ];then
+# export JAVA_HOME=/Library/Java/Home
+#fi
+
+# Set java version for general use
+# export JAVA_HOME=$(/usr/libexec/java_home)
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
   # Load macOS-specific aliases
@@ -781,6 +792,40 @@ if [[ $(_zqs-get-setting list-ssh-keys true) == 'true' ]]; then
   echo
 fi
 
+cd ~/Development
+
+PATH=$PATH:$HOME/bin
+PATH="~/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="~/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
+
+# Add GNU-sed to PATH
+# export PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
+
+export KUBECONFIG=~/.kube/config
+
+export GPG_TTY=$(tty)
+
+export PGPORT=5432;
+
+export TF_VAR_gcr_docker_registry_key="$(cat ~/.ssh/gcr_cred1)"
+
+# Starling config
+if [ -e /Users/stephan.blakeslee/.starling/etc/profile ]; then
+  . /Users/stephan.blakeslee/.starling/etc/profile
+else
+  echo "Could not find '/Users/stephan.blakeslee/.starling/etc/profile'"
+fi
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export MAVEN_OPTS="-Xmx5000m"
+
 if [[ $(_zqs-get-setting control-c-decorator 'true') == 'true' ]]; then
   # Original source: https://vinipsmaker.wordpress.com/2014/02/23/my-zsh-config/
   # bash prints ^C when you're typing a command and control-c to cancel, so it
@@ -978,3 +1023,11 @@ function zqs() {
 if [[ -f ~/.zqs-zprof-enabled ]]; then
   zprof
 fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/stephan.blakeslee/google-cloud-sdk/completion.zsh.inc'; fi
+
+export PATH="/opt/homebrew/opt/go@1.23/bin:$PATH"
