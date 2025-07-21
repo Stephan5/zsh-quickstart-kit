@@ -271,15 +271,19 @@ setopt correct
 unsetopt correctall
 
 # Base PATH
-PATH="$PATH:/sbin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+PATH="/opt/homebrew/bin:$PATH:/sbin:/usr/sbin:/bin:/usr/bin"
 
 # If you need to add extra directories to $PATH that are not checked for
 # here, add a file in ~/.zshrc.d - then you won't have to maintain a
 # fork of the kit.
 
 # Conditional PATH additions
-for path_candidate in /Applications/Xcode.app/Contents/Developer/usr/bin \
+for path_candidate in \
+  /Applications/Xcode.app/Contents/Developer/usr/bin \
   /opt/homebrew/sbin \
+  /opt/homebrew/opt/postgresql@17/bin \
+  /opt/homebrew/opt/go@1.23/bin \
+  /opt/homebrew/opt/gnu-sed/libexec/gnubin \
   /home/linuxbrew/.linuxbrew/bin \
   /home/linuxbrew/.linuxbrew/sbin \
   /opt/local/bin \
@@ -293,9 +297,7 @@ for path_candidate in /Applications/Xcode.app/Contents/Developer/usr/bin \
   ~/.linuxbrew/bin \
   ~/.linuxbrew/sbin \
   ~/.rbenv/bin \
-  ~/bin \
-  ~/src/gocode/bin \
-  ~/gocode
+  ~/bin
 do
   if [[ -d "${path_candidate}" ]]; then
     path+=("${path_candidate}")
