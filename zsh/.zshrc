@@ -935,6 +935,7 @@ function zqs() {
       echo "Disabling 1password ssh-agent. New ZSH sessions will no longer use 1password's ssh agent."
       _zqs-set-setting use-1password-ssh-agent false
       ;;
+
     'enable-1password-agent')
       echo "Enabling 1password ssh-agent. New ZSH sessions will use 1password's ssh agent."
       _zqs-set-setting use-1password-ssh-agent true
@@ -943,6 +944,7 @@ function zqs() {
     'disable-bindkey-handling')
       zsh-quickstart-disable-bindkey-handling
       ;;
+
     'enable-bindkey-handling')
       zsh-quickstart-enable-bindkey-handling
       ;;
@@ -950,12 +952,15 @@ function zqs() {
     'disable-control-c-decorator')
       zqs-quickstart-disable-control-c-decorator
       ;;
+
     'enable-control-c-decorator')
       zqs-quickstart-enable-control-c-decorator
       ;;
+
     'disable-debug-mode')
       rm -f ${ZDOTDIR:-$HOME}/.zqs-debug-mode
       ;;
+
     'enable-debug-mode')
       date > ${ZDOTDIR:-$HOME}/.zqs-debug-mode
       ;;
@@ -964,6 +969,7 @@ function zqs() {
       echo "Disabling diff-so-fancy plugin. New ZSH sessions will no longer use the plugin."
       _zqs-set-setting diff-so-fancy false
       ;;
+
     'enable-diff-so-fancy')
       echo "Enabling diff-so-fancy plugin. It will be loaded the next time you start a ZSH session."
       _zqs-set-setting diff-so-fancy true
@@ -972,6 +978,7 @@ function zqs() {
     'disable-zmv-autoloading')
       _zqs-disable-zmv-autoloading
       ;;
+
     'enable-zmv-autoloading')
       _zqs-enable-zmv-autoloading
       ;;
@@ -979,6 +986,7 @@ function zqs() {
     'disable-omz-plugins')
       zsh-quickstart-disable-omz-plugins
       ;;
+
     'enable-omz-plugins')
       zsh-quickstart-enable-omz-plugins
       ;;
@@ -986,6 +994,7 @@ function zqs() {
     'enable-ssh-askpass-require')
       zsh-quickstart-enable-ssh-askpass-require
       ;;
+
     'disable-ssh-askpass-require')
       zsh-quickstart-disable-ssh-askpass-require
       ;;
@@ -993,6 +1002,7 @@ function zqs() {
     'enable-ssh-key-listing')
       _zqs-set-setting list-ssh-keys true
       ;;
+
     'disable-ssh-key-listing')
       _zqs-set-setting list-ssh-keys false
       ;;
@@ -1000,6 +1010,7 @@ function zqs() {
     'disable-ssh-key-loading')
       _zqs-set-setting load-ssh-keys false
       ;;
+
     'enable-ssh-key-loading')
       _zqs-set-setting load-ssh-keys true
       ;;
@@ -1010,10 +1021,12 @@ function zqs() {
       rm -f ${ZDOTDIR:-$HOME}/.zqs-zprof-enabled
       echo "New ZSH sessions will no longer use profiling."
       ;;
+
     'enable-zsh-profiling')
       touch ${ZDOTDIR:-$HOME}/.zqs-zprof-enabled
       echo "New ZSH sessions will use profiling."
       ;;
+
     *)
       zqs-help
       ;;
@@ -1024,6 +1037,8 @@ function zqs() {
 if [[ -f ${ZDOTDIR:-$HOME}/.zqs-zprof-enabled ]]; then
   zprof
 fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc'; fi
