@@ -313,6 +313,7 @@ for path_candidate in \
   $HOME/.cargo/bin \
   $HOME/.linuxbrew/bin \
   $HOME/.linuxbrew/sbin \
+  $HOME/.local/bin \
   $HOME/.rbenv/bin \
   $HOME/bin
 do
@@ -589,15 +590,10 @@ fi
 
 export LOCATE_PATH=/var/db/locate.database
 
-# GCP credentials
-export GOOGLE_CREDENTIALS=$(cat $HOME/.config/gcloud/application_default_credentials.json)
-
 # Load AWS credentials when present
 if [ -f ~/.aws/aws_variables ]; then
   source ~/.aws/aws_variables
 fi
-
-export AWS_IAM_USERNAME=StephanBlakeslee
 
 # JAVA setup - needed for iam-* tools
 #if [ -d /Library/Java/Home ];then
@@ -817,33 +813,6 @@ if [[ $(_zqs-get-setting list-ssh-keys true) == 'true' ]]; then
   echo
 fi
 
-cd ~/Development
-
-# Perl
-PATH="~/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="~/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
-
-export KUBECONFIG=~/.kube/config
-export GPG_TTY=$TTY
-export PGPORT=5432;
-
-# Starling config
-if [ -e /Users/stephan.blakeslee/.starling/etc/profile ]; then
-  . /Users/stephan.blakeslee/.starling/etc/profile
-else
-  echo "Could not find '/Users/stephan.blakeslee/.starling/etc/profile'"
-fi
-
-# NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-export MAVEN_OPTS="-Xmx5000m"
-
 if [[ $(_zqs-get-setting control-c-decorator 'true') == 'true' ]]; then
   # Original source: https://vinipsmaker.wordpress.com/2014/02/23/my-zsh-config/
   # bash prints ^C when you're typing a command and control-c to cancel, so it
@@ -1061,6 +1030,40 @@ if [[ -f ${ZDOTDIR:-$HOME}/.zqs-zprof-enabled ]]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# CUSTOM
+
+cd ~/Development
+
+# Perl
+PATH="~/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="~/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
+
+export KUBECONFIG=~/.kube/config
+export GPG_TTY=$TTY
+export PGPORT=5432;
+
+# Starling config
+if [ -e /Users/stephan.blakeslee/.starling/etc/profile ]; then
+  . /Users/stephan.blakeslee/.starling/etc/profile
+else
+  echo "Could not find '/Users/stephan.blakeslee/.starling/etc/profile'"
+fi
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export MAVEN_OPTS="-Xmx5000m"
+
+# GCP credentials
+export GOOGLE_CREDENTIALS=$(cat $HOME/.config/gcloud/application_default_credentials.json)
+
+export AWS_IAM_USERNAME=StephanBlakeslee
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc'; fi
