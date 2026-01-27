@@ -574,7 +574,6 @@ export LOCATE_PATH=/var/db/locate.database
 
 # GCP credentials
 export GOOGLE_CREDENTIALS=$(cat $HOME/.config/gcloud/application_default_credentials.json)
-export TF_VAR_gcr_docker_registry_key="$(cat $HOME/.ssh/gcr_cred1)"
 
 # Load AWS credentials when present
 if [ -f ~/.aws/aws_variables ]; then
@@ -814,8 +813,6 @@ export KUBECONFIG=~/.kube/config
 export GPG_TTY=$TTY
 export PGPORT=5432;
 
-export TF_VAR_gcr_docker_registry_key="$(cat ~/.ssh/gcr_cred1)"
-
 # Starling config
 if [ -e /Users/stephan.blakeslee/.starling/etc/profile ]; then
   . /Users/stephan.blakeslee/.starling/etc/profile
@@ -1033,5 +1030,3 @@ if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/path.zsh.inc' ]; then . '/Use
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/stephan.blakeslee/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/stephan.blakeslee/google-cloud-sdk/completion.zsh.inc'; fi
-
-export PATH="/opt/homebrew/opt/go@1.23/bin:$PATH"
