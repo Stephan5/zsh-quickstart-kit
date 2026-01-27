@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+
+alias rm -rf='trash'
+
+alias gbrm="grbm"
+
+alias uuid="uuidgen | tr -d '\n' | tr '[:upper:]' '[:lower:]' | pbcopy && pbpaste && echo"
+alias python='python3'
+
+alias mp="cd ~/Development/management-portal"
+alias pt="cd ~/Development/platform"
+alias envi="cd ~/Development/environments"
+alias dev="cd ~/Development"

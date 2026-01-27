@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+
+# Starting directory
+cd "$HOME/Development"

@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+# Pure prompt
+autoload -U promptinit; promptinit
+zstyle :prompt:pure:path color cyan
+zstyle :prompt:pure:git:branch:cached color '242'
+prompt pure

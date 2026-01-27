@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+
+# PATH customisations
+PATH="/usr/local/bin:$PATH"
+PATH="/opt/homebrew/bin:$PATH"
+PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
+PATH="/opt/homebrew/opt/go@1.23/bin:$PATH"
+PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+
+for path_candidate in \
+  /Applications/Postgres.app/Contents/Versions/17/bin \
+  /usr/local/go/bin \
+  $HOME/Documents/bin \
+  $HOME/go/bin \
+  $HOME/.volta/bin
+do
+  if [[ -d "${path_candidate}" ]]; then
+    path+=("${path_candidate}")
+  fi
+done
+export PATH
