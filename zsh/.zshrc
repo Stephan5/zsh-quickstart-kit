@@ -283,7 +283,6 @@ for path_candidate in \
   /opt/homebrew/sbin \
   /opt/homebrew/opt/postgresql@17/bin \
   /opt/homebrew/opt/go@1.23/bin \
-  /opt/homebrew/opt/gnu-sed/libexec/gnubin \
   /home/linuxbrew/.linuxbrew/bin \
   /home/linuxbrew/.linuxbrew/sbin \
   /opt/local/bin \
@@ -291,18 +290,25 @@ for path_candidate in \
   /usr/local/bin \
   /usr/local/sbin \
   /usr/local/go/bin \
-  ~/Documents/bin \
-  ~/.cabal/bin \
-  ~/.cargo/bin \
-  ~/.linuxbrew/bin \
-  ~/.linuxbrew/sbin \
-  ~/.rbenv/bin \
-  ~/bin
+  $HOME/Documents/bin \
+  $HOME/go/bin \
+  $HOME/.cabal/bin \
+  $HOME/.cargo/bin \
+  $HOME/.linuxbrew/bin \
+  $HOME/.linuxbrew/sbin \
+  $HOME/.rbenv/bin \
+  $HOME/bin
 do
   if [[ -d "${path_candidate}" ]]; then
     path+=("${path_candidate}")
   fi
 done
+
+PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
+PATH="/opt/homebrew/opt/go@1.23/bin:$PATH"
+PATH="$HOME/.volta/bin:$PATH"
+PATH="/Applications/Postgres.app/Contents/Versions/17/bin:$PATH"
+
 export PATH
 
 # We will dedupe $PATH after loading ~/.zshrc.d/* so that any duplicates
@@ -796,15 +802,12 @@ fi
 
 cd ~/Development
 
-PATH=$PATH:$HOME/bin
+# Perl
 PATH="~/perl5/bin${PATH:+:${PATH}}"; export PATH;
 PERL5LIB="~/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
 PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
 PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
-
-# Add GNU-sed to PATH
-# export PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
 
 export KUBECONFIG=~/.kube/config
 
