@@ -811,9 +811,7 @@ PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
 
 export KUBECONFIG=~/.kube/config
-
-export GPG_TTY=$(tty)
-
+export GPG_TTY=$TTY
 export PGPORT=5432;
 
 export TF_VAR_gcr_docker_registry_key="$(cat ~/.ssh/gcr_cred1)"
