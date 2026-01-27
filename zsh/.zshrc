@@ -349,6 +349,7 @@ onepassword-agent-check() {
     fi
     zqs-debug "ONE_P_SOCK=$ONE_P_SOCK"
     if [[ -r "$ONE_P_SOCK" ]];then
+      echo "Using 1Password's ssh agent..."
       export SSH_AUTH_SOCK="$ONE_P_SOCK"
     else
       echo "Quickstart is set to use 1Password's ssh agent, but $ONE_P_SOCK isn't readable!"
