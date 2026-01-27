@@ -142,8 +142,7 @@ function httpserver() {
 }
 
 function pruneBranches() {
-  if [[ ! -d ".git" && ! -d "../.git" ]]
-    then
+  if ! is-git-repo; then
       echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
       return;
   fi
@@ -485,8 +484,7 @@ EOF
  }
 
  function switchAndRebase() {
-   if [[ ! -d ".git" && ! -d "../.git" ]]
-     then
+   if ! is-git-repo; then
        echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
        return;
    fi
@@ -514,8 +512,7 @@ EOF
  }
 
  function switchAndPullMaster() {
-   if [[ ! -d ".git" && ! -d "../.git" ]]
-     then
+   if ! is-git-repo; then
        echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
        return;
    fi
@@ -532,8 +529,7 @@ EOF
  }
 
  function stablePull() {
-   if [[ ! -d ".git" && ! -d "../.git" ]]
-     then
+   if ! is-git-repo; then
        echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
        return;
    fi
@@ -550,8 +546,7 @@ EOF
  }
 
  function stableRebase() {
-   if [[ ! -d ".git" && ! -d "../.git" ]]
-     then
+   if ! is-git-repo; then
        echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
        return;
    fi
@@ -564,8 +559,7 @@ EOF
  }
 
  function updateTags() {
-   if [[ ! -d ".git" && ! -d "../.git" ]]
-     then
+   if ! is-git-repo; then
        echo Not a git repo you $fg_bold[red]twat$fg_bold[white].
        return;
    fi
@@ -630,6 +624,14 @@ function rmserver() {
 
 function rmslt() {
   platformBuild services/data/services/replicationmanager/service-tests test $1
+}
+
+function is-git-repo() {
+  if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 # Honor old .zsh_functions.local customizations, but print depecation warning.
