@@ -573,6 +573,35 @@ EOF
   ssh-keygen -R $1
  }
 
+function prime-platform() {
+  PREVIOUS_DIRECTORY=$PWD
+  cd ~/Development/platform/platform
+
+  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+  if [ "$CURRENT_BRANCH" = "master" ]; then
+    echo "You are on the master branch, attempting to pull stable tag..."
+    stablePull
+  else
+    echo "You are on the $CURRENT_BRANCH branch, updating stable tag..."
+    star f
+    git pull
+  fi
+
+  echo "Running Gradle platform build using the following incantation -  gradlew compileTestJava"
+  echo
+  gradlew compileTestJava
+
+  echo "Stopping gradle daemons..."
+  echo
+  gradlew --stop
+
+
+
+  cd $PREVIOUS_DIRECTORY
+
+	echo "Platform primed!"
+}
+
 function platformBuild() {
 
   if [ -z "$1" ]
